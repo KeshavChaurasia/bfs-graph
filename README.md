@@ -25,6 +25,9 @@ BFS Implementation
 The overall code structure of this project is:
 
 Test Graph Image
+------------------
+This is the test graph to implement binary search
+
 ![Alt text](/images/graph.png)
 
 Converter: edge tuples to CSR
