@@ -19,93 +19,37 @@ In summary, CSR space consumptions are:
 - Adjacency list: |E| entries. 
 - Weight list: |E| entries.
 
-
 -----
-Code specification
+BFS Implementation
 ---------
 The overall code structure of this project is:
 
-- **tuple_text_to_binary_csr_mmap**: converting tuple text list into binary CSR with **the following feature**. 
-> Directly back the **CSR** and **weight** arrays with files residing on disk, which has to synchronize udpates of **CSR** and **weight** to files on disk. Thus this design suffers from very slow processing speed in network-based file system (e.g., LUSTRE). Fortunately, this design is memory efficient comparing to **tuple_text_to_binary_csr**.
-> ```This source code generate **symmetric weights**, that is, weight of a->b = weight of b->a for undirected graph.```
+Test Graph Image
+![Alt text](/images/graph.png)
 
-
-
-
-- **tuple_text_to_binary_csr_extreme_graph**: converting tuple text list into binary CSR with **the following feature**. 
-> Split tuple list file to enhance parallelism, **fast** and **more complex**. There is a README.md file inside of this folder details the use.
-> ```This source code CANNOT generate weights.```
-
-- **tuple_text_to_binary_csr_mem**:
-Converting arbitrary *text format* edge tuple list file into Compressed Sparse Row (CSR) format binary file. 
-> Allocating **CSR** and **weight** arrays in memory. Once all updates to these two arrays are done, we dump them to disk.
-
-
-
-- **graph_reader**: Reading the binary format CSR file into memory for graph computing.
-
-
------
 Converter: edge tuples to CSR
 ----
 - Compile: make
 - To execute: type "./text_to_bin.bin", it will show you what is needed
-- One example is provided in toy_graph folder. The user can use **./text_to_bin.bin ./toy_graph/toy.dat 1 2** to run the converter.
-
-
-**Real example**:
-- Download a graph file, e.g., **wget https://snap.stanford.edu/data/bigdata/communities/com-orkut.ungraph.txt.gz** file. 
-- Decompress the file, e.g., **gzip -d /path/to/com-orkut.ungraph.txt.gz**. 
-- Convert the edge list into binary CSR, e.g., **/path/to/text_to_bin.bin /path/to/com-orkut.ungraph.txt 1 0**. Note, the first number '1' means we want to reverse the edge, the second number '0' means we will skip 0 lines from /path/to/com-orkut.ungraph.txt. Eventually, this commandline will yield two files: */path/to/com-orkut.ungraph.txt_beg_pos.bin* and */path/to/com-orkut.ungraph.txt_csr.bin*. 
-- Then you can use these two files to run [enterprise](https://github.com/iHeartGraph/Enterprise).
-
+- One example is provided in test_graph folder. The user can use **./text_to_bin.bin ./test_graph/graph_dat.dat 1 0** to run the converter.
 
 -----
 Graph reader
 ----
 - Compile: make
 - To execute: type "./graph_loader.bin", it will show you what is needed
-- You can use the converter converted graph to run this command. 
+- You can use the converter converted graph to run this command.
+- at the end of the command keep the start node and an end node.
 
-**Toy example from converter**:
-- ./graph_loader.bin ../tuple_text_to_binary_csr/toy_graph/toy.dat_beg_pos.bin  ../tuple_text_to_binary_csr/toy_graph/toy.dat_csr.bin ../tuple_text_to_binary_csr/toy_graph/toy.dat_weight.bin 
-
---------
-Further Development
---------------
-This repo serves as the purpose of helping developers to, instead of distracted by coding tools to convert graph, immediately focusing on developing graph algorithms, such as, BFS, SSSP, PageRank, and etc.
-
-For instance, you can directly code up your BFS, SSSP, PageRank and etc algorithms at [line 20-32 of the main.cpp in graph_reader](https://github.com/asherliu/graph_project_start/blob/master/graph_reader/main.cpp#L20-L32) which is detailed as follows:
->
-	
-	//template <file_vertex_t, file_index_t, file_weight_t
-	//new_vertex_t, new_index_t, new_weight_t>
-	graph<long, long, int, long, long, char>
-	*ginst = new graph
-	<long, long, int, long, long, char>
-	(beg_file,csr_file,weight_file);
-    
-    //**line 20 - 32 
-    //You can implement your single threaded graph algorithm here.
-    //like BFS, SSSP, PageRank and etc.
-    
-    //for(int i = 0; i < ginst->vert_count+1; i++)
-    //{
-    //    int beg = ginst->beg_pos[i];
-    //    int end = ginst->beg_pos[i+1];
-    //    std::cout<<i<<"'s neighor list: ";
-    //    for(int j = beg; j < end; j++)
-    //        std::cout<<ginst->csr[j]<<" ";
-    //    std::cout<<"\n";
-    //} 
-     
-
-
+**Graph Test from converter**:
+- ./graph_loader.bin ../tuple_text_to_binary_csr_mmap/test_graph/graph.dat_beg_pos.bin ../tuple_text_to_binary_csr_mmap/test_graph/graph.dat_csr.bin ../tuple_text_to_binary_csr_mmap/test_graph/graph.dat_weight.bin 1 9
 
 
 ----
 Acknowledgement
 ----
+
+https://github.com/asherliu/graph_project_start
 
 [SC  '15] Enterprise: Breadth-First Graph Traversal on GPUs [[PDF](http://personal.stevens.edu/~hliu77/docs/sc15.pdf)]
 
